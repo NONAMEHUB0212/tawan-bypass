@@ -579,9 +579,13 @@ function startBypass() {
 }
 
 // รับ token จาก iframe
+// BUG FIX: ป้องกัน token ถูกส่งซ้ำหลายครั้ง
+let tokenReceived = false;
 window.addEventListener('message', async (e) => {
   const token = e.data?.token || e.data?.['cf-turnstile-response'];
-  if (!token || !currentUrl) return;
+  // BUG FIX: เช็ค token ว่าง / invalid / ซ้ำ
+  if (!token || token.length < 10 || !currentUrl || tokenReceived) return;
+  tokenReceived = true;
 
   // ซ่อน captcha, แสดง status
   document.getElementById('captcha-section').classList.remove('show');
@@ -592,20 +596,38 @@ window.addEventListener('message', async (e) => {
       method:  'POST',
       headers: { 'Content-Type': 'application/json' },
       body:    JSON.stringify({ url: currentUrl, token }),
-      signal:  AbortSignal.timeout(20_000),
+      // BUG FIX: เพิ่ม timeout 30s (platorelay/platoboost ช้า)
+      signal:  AbortSignal.timeout(30_000),
     });
-    const data = await res.json();
 
+    // BUG FIX: เช็ค HTTP status ก่อน parse JSON
+    if (!res.ok) {
+      const errData = await res.json().catch(() => ({}));
+      hideStatus();
+      showError(errData.message || `Server error: HTTP ${res.status}`);
+      return;
+    }
+
+    const data = await res.json();
     hideStatus();
 
     if (data.status === 'success') {
+      // BUG FIX: เช็ค result ว่าง
+      if (!data.result) {
+        showError('ได้รับ result ว่าง — กรุณาลองใหม่');
+        return;
+      }
       showSuccess(data.result);
     } else {
       showError(data.message || 'เกิดข้อผิดพลาด');
     }
   } catch (err) {
     hideStatus();
-    showError('เชื่อมต่อ API ล้มเหลว: ' + err.message);
+    // BUG FIX: แยก timeout error ออกให้ชัด
+    const msg = err.name === 'TimeoutError'
+      ? 'หมดเวลา 30 วินาที — กรุณาลองใหม่'
+      : 'เชื่อมต่อ API ล้มเหลว: ' + err.message;
+    showError(msg);
   }
 });
 
@@ -674,6 +696,7 @@ function showError(msg) {
 
 function resetAll() {
   currentUrl = '';
+  tokenReceived = false; // BUG FIX: reset flag ทุกครั้งที่ bypass ใหม่
   document.getElementById('url-input').value    = '';
   document.getElementById('url-input').disabled = false;
   document.getElementById('start-btn').disabled = false;
