@@ -1,0 +1,713 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>GOXDEV Bypass — Free Ad-Link Bypasser</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=Sarabun:wght@300;400;500&display=swap" rel="stylesheet"/>
+<style>
+/* ══════════════════════════════════════
+   VARIABLES & RESET
+══════════════════════════════════════ */
+:root {
+  --bg:       #050508;
+  --s1:       #0a0a12;
+  --s2:       #0f0f1a;
+  --border:   rgba(255,255,255,.07);
+  --a1:       #00d4ff;
+  --a2:       #7c3aed;
+  --a3:       #10b981;
+  --err:      #f43f5e;
+  --text:     #e2e2f0;
+  --muted:    #5a5a78;
+  --display:  'Syne', sans-serif;
+  --body:     'Sarabun', sans-serif;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{
+  background:var(--bg);
+  color:var(--text);
+  font-family:var(--body);
+  min-height:100vh;
+  overflow-x:hidden;
+  cursor:none;
+}
+
+/* ── custom cursor ── */
+#cursor{
+  position:fixed;width:12px;height:12px;
+  background:var(--a1);border-radius:50%;
+  pointer-events:none;z-index:99999;
+  transform:translate(-50%,-50%);
+  transition:transform .1s,background .2s,width .2s,height .2s;
+  mix-blend-mode:screen;
+}
+#cursor-ring{
+  position:fixed;width:36px;height:36px;
+  border:1px solid rgba(0,212,255,.4);border-radius:50%;
+  pointer-events:none;z-index:99998;
+  transform:translate(-50%,-50%);
+  transition:transform .15s ease-out,width .2s,height .2s,opacity .2s;
+}
+body:hover #cursor{opacity:1}
+
+/* ── noise overlay ── */
+body::after{
+  content:'';position:fixed;inset:0;
+  background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
+  pointer-events:none;z-index:0;opacity:.6;
+}
+
+/* ── aurora bg ── */
+.aurora{
+  position:fixed;inset:0;z-index:0;overflow:hidden;pointer-events:none;
+}
+.aurora-blob{
+  position:absolute;border-radius:50%;filter:blur(120px);
+  animation:auroraMove 20s ease-in-out infinite alternate;
+}
+.ab1{width:700px;height:700px;top:-200px;left:-200px;
+     background:radial-gradient(circle,rgba(0,212,255,.12),transparent 70%);
+     animation-delay:0s}
+.ab2{width:600px;height:600px;bottom:-150px;right:-150px;
+     background:radial-gradient(circle,rgba(124,58,237,.15),transparent 70%);
+     animation-delay:-7s}
+.ab3{width:400px;height:400px;top:40%;left:40%;
+     background:radial-gradient(circle,rgba(16,185,129,.08),transparent 70%);
+     animation-delay:-14s}
+@keyframes auroraMove{
+  0%{transform:translate(0,0) scale(1)}
+  100%{transform:translate(60px,40px) scale(1.15)}
+}
+
+/* ── layout ── */
+.wrap{
+  position:relative;z-index:1;
+  max-width:720px;margin:0 auto;
+  padding:0 20px 100px;
+}
+
+/* ══════════════════════════════════════
+   HEADER / HERO
+══════════════════════════════════════ */
+.hero{
+  padding:80px 0 60px;
+  text-align:center;
+}
+.hero-badge{
+  display:inline-flex;align-items:center;gap:8px;
+  font-family:var(--display);font-size:11px;letter-spacing:2px;text-transform:uppercase;
+  color:var(--a1);
+  border:1px solid rgba(0,212,255,.25);
+  background:rgba(0,212,255,.06);
+  padding:6px 16px;border-radius:99px;
+  margin-bottom:28px;
+  animation:fadeDown .6s ease both;
+}
+.hero-badge::before{
+  content:'';width:6px;height:6px;border-radius:50%;
+  background:var(--a1);animation:blink 1.5s infinite;
+}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.2}}
+
+h1{
+  font-family:var(--display);
+  font-size:clamp(42px,8vw,72px);
+  font-weight:800;
+  line-height:1.05;
+  letter-spacing:-2px;
+  margin-bottom:20px;
+  animation:fadeDown .6s .1s ease both;
+}
+.h1-line1{display:block;color:#fff}
+.h1-line2{
+  display:block;
+  background:linear-gradient(90deg,var(--a1),var(--a2));
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;
+  background-clip:text;
+}
+.hero-sub{
+  font-size:17px;color:var(--muted);line-height:1.7;
+  max-width:480px;margin:0 auto 16px;
+  animation:fadeDown .6s .2s ease both;
+}
+.hero-by{
+  font-size:12px;color:rgba(255,255,255,.25);
+  letter-spacing:1px;
+  animation:fadeDown .6s .3s ease both;
+}
+.hero-by span{color:rgba(0,212,255,.5)}
+
+@keyframes fadeDown{
+  from{opacity:0;transform:translateY(-16px)}
+  to{opacity:1;transform:none}
+}
+
+/* ══════════════════════════════════════
+   MAIN CARD
+══════════════════════════════════════ */
+.card{
+  background:rgba(10,10,18,.8);
+  border:1px solid var(--border);
+  border-radius:28px;
+  padding:36px;
+  backdrop-filter:blur(24px);
+  -webkit-backdrop-filter:blur(24px);
+  box-shadow:
+    0 40px 80px -20px rgba(0,0,0,.8),
+    0 0 0 1px rgba(255,255,255,.04) inset,
+    0 0 60px rgba(0,212,255,.06);
+  animation:fadeUp .7s .35s ease both;
+}
+@keyframes fadeUp{
+  from{opacity:0;transform:translateY(24px)}
+  to{opacity:1;transform:none}
+}
+
+/* ── input group ── */
+.input-group{
+  display:flex;gap:10px;margin-bottom:28px;
+  flex-wrap:wrap;
+}
+.url-input{
+  flex:1;min-width:0;
+  background:rgba(0,0,0,.5);
+  border:1px solid var(--border);
+  border-radius:14px;
+  padding:14px 18px;
+  color:var(--text);
+  font-family:var(--body);font-size:15px;
+  outline:none;
+  transition:border-color .2s,box-shadow .2s;
+}
+.url-input:focus{
+  border-color:rgba(0,212,255,.4);
+  box-shadow:0 0 0 3px rgba(0,212,255,.08);
+}
+.url-input::placeholder{color:var(--muted)}
+
+.btn-bypass{
+  padding:14px 28px;
+  background:linear-gradient(135deg,var(--a1),#0099cc);
+  border:none;border-radius:14px;
+  color:#000;font-family:var(--display);
+  font-size:14px;font-weight:700;letter-spacing:.5px;
+  cursor:none;
+  transition:all .2s;
+  white-space:nowrap;
+  box-shadow:0 8px 24px rgba(0,212,255,.3);
+}
+.btn-bypass:hover{
+  filter:brightness(1.1);
+  transform:translateY(-2px);
+  box-shadow:0 12px 32px rgba(0,212,255,.4);
+}
+.btn-bypass:active{transform:translateY(0)}
+.btn-bypass:disabled{
+  opacity:.5;cursor:not-allowed;transform:none;
+}
+
+/* ── divider ── */
+.divider{
+  display:flex;align-items:center;gap:12px;
+  margin-bottom:24px;
+  font-size:11px;letter-spacing:1.5px;text-transform:uppercase;
+  color:var(--muted);
+}
+.divider::before,.divider::after{
+  content:'';flex:1;height:1px;
+  background:var(--border);
+}
+
+/* ── captcha section ── */
+#captcha-section{
+  display:none;
+  flex-direction:column;align-items:center;
+  gap:16px;
+  padding:24px;
+  background:rgba(0,0,0,.3);
+  border-radius:18px;
+  border:1px solid var(--border);
+  margin-bottom:24px;
+  animation:fadeUp .4s ease both;
+}
+#captcha-section.show{display:flex}
+
+.captcha-label{
+  font-size:13px;color:var(--muted);text-align:center;
+}
+.captcha-label strong{color:var(--text)}
+
+#cf-iframe{
+  width:300px;height:65px;
+  border:none;border-radius:10px;
+  background:transparent;
+}
+
+/* ── status ── */
+#status-bar{
+  display:none;
+  align-items:center;gap:12px;
+  padding:14px 18px;
+  border-radius:14px;
+  background:rgba(0,0,0,.3);
+  border:1px solid var(--border);
+  margin-bottom:20px;
+  font-size:14px;
+  animation:fadeUp .3s ease both;
+}
+#status-bar.show{display:flex}
+.spinner{
+  width:18px;height:18px;flex-shrink:0;
+  border:2px solid rgba(0,212,255,.2);
+  border-top-color:var(--a1);
+  border-radius:50%;
+  animation:spin .7s linear infinite;
+}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* ── result ── */
+#result-box{
+  display:none;
+  padding:20px;
+  border-radius:18px;
+  animation:fadeUp .4s ease both;
+}
+#result-box.show{display:block}
+#result-box.success{
+  background:rgba(16,185,129,.08);
+  border:1px solid rgba(16,185,129,.25);
+}
+#result-box.error{
+  background:rgba(244,63,94,.08);
+  border:1px solid rgba(244,63,94,.25);
+}
+
+.result-label{
+  font-size:11px;letter-spacing:1.5px;text-transform:uppercase;
+  margin-bottom:10px;font-family:var(--display);
+}
+.success .result-label{color:var(--a3)}
+.error .result-label{color:var(--err)}
+
+.result-content{
+  font-size:14px;line-height:1.7;
+  word-break:break-all;
+  color:var(--text);
+  font-family:'SF Mono','Fira Code',monospace;
+  margin-bottom:16px;
+}
+
+.result-btns{display:flex;gap:10px;flex-wrap:wrap}
+.rbtn{
+  padding:9px 20px;border-radius:10px;
+  border:1px solid var(--border);
+  background:rgba(255,255,255,.06);
+  color:var(--text);font-family:var(--display);
+  font-size:12px;font-weight:600;letter-spacing:.5px;
+  cursor:none;transition:all .2s;
+}
+.rbtn:hover{background:rgba(255,255,255,.12);transform:translateY(-1px)}
+.rbtn.primary{
+  background:linear-gradient(135deg,var(--a3),#059669);
+  border-color:transparent;color:#fff;
+  box-shadow:0 4px 16px rgba(16,185,129,.3);
+}
+.rbtn.primary:hover{filter:brightness(1.1)}
+
+/* ── reset btn ── */
+.reset-row{text-align:center;margin-top:20px}
+.btn-reset{
+  background:none;border:none;
+  color:var(--muted);font-size:13px;
+  cursor:none;transition:color .2s;
+  font-family:var(--body);
+  text-decoration:underline;text-underline-offset:3px;
+}
+.btn-reset:hover{color:var(--text)}
+
+/* ══════════════════════════════════════
+   HOW IT WORKS
+══════════════════════════════════════ */
+.how{
+  margin-top:48px;
+  animation:fadeUp .7s .5s ease both;
+}
+.how-title{
+  font-family:var(--display);font-size:13px;
+  letter-spacing:2px;text-transform:uppercase;
+  color:var(--muted);text-align:center;margin-bottom:24px;
+}
+.steps{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+.step{
+  background:rgba(10,10,18,.6);
+  border:1px solid var(--border);
+  border-radius:18px;padding:20px;
+  text-align:center;
+  transition:border-color .25s,transform .25s;
+}
+.step:hover{border-color:rgba(0,212,255,.2);transform:translateY(-3px)}
+.step-icon{font-size:28px;margin-bottom:10px}
+.step-num{
+  font-family:var(--display);font-size:10px;
+  letter-spacing:2px;color:var(--a1);
+  text-transform:uppercase;margin-bottom:6px;
+}
+.step-text{font-size:13px;color:var(--muted);line-height:1.6}
+
+/* ── supported sites ── */
+.sites-section{
+  margin-top:40px;
+  animation:fadeUp .7s .6s ease both;
+}
+.sites-title{
+  font-family:var(--display);font-size:13px;
+  letter-spacing:2px;text-transform:uppercase;
+  color:var(--muted);text-align:center;margin-bottom:16px;
+}
+.sites-grid{
+  display:flex;flex-wrap:wrap;gap:8px;justify-content:center;
+}
+.site-tag{
+  font-size:11px;font-family:'SF Mono','Fira Code',monospace;
+  padding:5px 12px;border-radius:8px;
+  background:rgba(255,255,255,.04);
+  border:1px solid var(--border);
+  color:var(--muted);
+  transition:all .2s;
+}
+.site-tag:hover{color:var(--a1);border-color:rgba(0,212,255,.2)}
+
+/* ── footer ── */
+footer{
+  text-align:center;margin-top:60px;
+  font-size:12px;color:var(--muted);
+  letter-spacing:.5px;
+  animation:fadeUp .7s .7s ease both;
+}
+footer strong{color:rgba(0,212,255,.6)}
+
+@media(max-width:580px){
+  .steps{grid-template-columns:1fr}
+  .card{padding:24px 20px}
+  h1{letter-spacing:-1px}
+  .input-group{flex-direction:column}
+  .btn-bypass{width:100%}
+}
+</style>
+</head>
+<body>
+
+<!-- cursor -->
+<div id="cursor"></div>
+<div id="cursor-ring"></div>
+
+<!-- aurora -->
+<div class="aurora">
+  <div class="aurora-blob ab1"></div>
+  <div class="aurora-blob ab2"></div>
+  <div class="aurora-blob ab3"></div>
+</div>
+
+<div class="wrap">
+
+  <!-- HERO -->
+  <div class="hero">
+    <div class="hero-badge">🔓 Free · No Install · No Login</div>
+    <h1>
+      <span class="h1-line1">Bypass</span>
+      <span class="h1-line2">Ad-Links</span>
+    </h1>
+    <p class="hero-sub">ข้ามหน้า ads ได้ทันที ฟรี ไม่ต้องติดตั้งอะไร รองรับกว่า 35 เว็บไซต์</p>
+    <p class="hero-by">จัดทำโดย <span>tawan_x2noban</span> · GOXDEV SHOP</p>
+  </div>
+
+  <!-- MAIN CARD -->
+  <div class="card">
+
+    <!-- URL input -->
+    <div class="input-group">
+      <input id="url-input" class="url-input" type="url"
+             placeholder="วาง URL ที่ต้องการ bypass เช่น https://linkvertise.com/xxxxx"/>
+      <button class="btn-bypass" id="start-btn" onclick="startBypass()">Bypass →</button>
+    </div>
+
+    <!-- captcha -->
+    <div id="captcha-section">
+      <p class="captcha-label">กรุณายืนยันว่าคุณไม่ใช่บอท<br/><strong>กดผ่าน captcha ด้านล่างเพื่อดำเนินการต่อ</strong></p>
+      <iframe id="cf-iframe"
+              src="https://userscript.baconbypass.online/load-cf"
+              scrolling="no"
+              allowtransparency="true"></iframe>
+    </div>
+
+    <!-- status -->
+    <div id="status-bar">
+      <div class="spinner"></div>
+      <span id="status-text">กำลัง bypass…</span>
+    </div>
+
+    <!-- result -->
+    <div id="result-box">
+      <div class="result-label" id="result-label">ผลลัพธ์</div>
+      <div class="result-content" id="result-content"></div>
+      <div class="result-btns" id="result-btns"></div>
+    </div>
+
+    <!-- reset -->
+    <div class="reset-row" id="reset-row" style="display:none">
+      <button class="btn-reset" onclick="resetAll()">← bypass URL ใหม่</button>
+    </div>
+
+  </div>
+
+  <!-- HOW IT WORKS -->
+  <div class="how">
+    <p class="how-title">วิธีการทำงาน</p>
+    <div class="steps">
+      <div class="step">
+        <div class="step-icon">📋</div>
+        <div class="step-num">Step 01</div>
+        <div class="step-text">วาง URL ที่ต้องการ bypass ลงในช่องด้านบน</div>
+      </div>
+      <div class="step">
+        <div class="step-icon">✅</div>
+        <div class="step-num">Step 02</div>
+        <div class="step-text">กดผ่าน captcha เพื่อยืนยันว่าไม่ใช่บอท</div>
+      </div>
+      <div class="step">
+        <div class="step-icon">🚀</div>
+        <div class="step-num">Step 03</div>
+        <div class="step-text">รับลิงก์จริงได้ทันที ไม่ต้องรอโฆษณา</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SUPPORTED SITES -->
+  <div class="sites-section">
+    <p class="sites-title">รองรับ 35+ เว็บไซต์</p>
+    <div class="sites-grid" id="sites-grid"></div>
+  </div>
+
+  <footer>
+    <strong>GOXDEV SHOP</strong> · จัดทำโดย tawan_x2noban · ฟรี 100% · ไม่เก็บข้อมูล
+  </footer>
+
+</div><!-- /wrap -->
+
+<script>
+// ══════════════════════════════════════
+//  CONFIG
+// ══════════════════════════════════════
+const API = 'https://goxdev-bypass-api.goxdev-api.workers.dev/bypass';
+
+const SITES = [
+  'linkvertise.com','lootdest.org','lootdest.com','lootdest.info',
+  'loot-link.com','loot-links.com','lootlink.org','lootlinks.co',
+  'links-loot.com','linksloot.net','link-unlock.com',
+  'boost.ink','mboost.me','direct-link.net',
+  'link-hub.net','link-target.net','link-center.net','link-to.net',
+  'sub2unlock.com','sub2get.com','sub2unlocksl.com',
+  'rekonise.com','pastebin.com','pastefy.app','paste-drop.com',
+  'scriptpastebins.com','socialwolvez.com','robloxscripts.gg',
+  'neoxsoftworks.eu','ntt-hub.xyz','ldnesfspublic.org',
+  'auth.platoboost.app','auth.platorelay.com','trigonevo.com',
+];
+
+// ── render sites ──────────────────────
+const grid = document.getElementById('sites-grid');
+SITES.forEach(s => {
+  const el = document.createElement('span');
+  el.className = 'site-tag';
+  el.textContent = s;
+  grid.appendChild(el);
+});
+
+// ══════════════════════════════════════
+//  CURSOR
+// ══════════════════════════════════════
+const cur  = document.getElementById('cursor');
+const ring = document.getElementById('cursor-ring');
+document.addEventListener('mousemove', e => {
+  cur.style.left  = e.clientX + 'px';
+  cur.style.top   = e.clientY + 'px';
+  setTimeout(() => {
+    ring.style.left = e.clientX + 'px';
+    ring.style.top  = e.clientY + 'px';
+  }, 80);
+});
+document.querySelectorAll('button,a,.site-tag,.step').forEach(el => {
+  el.addEventListener('mouseenter', () => {
+    cur.style.width  = '20px';
+    cur.style.height = '20px';
+    ring.style.width  = '50px';
+    ring.style.height = '50px';
+    ring.style.opacity = '.6';
+  });
+  el.addEventListener('mouseleave', () => {
+    cur.style.width  = '12px';
+    cur.style.height = '12px';
+    ring.style.width  = '36px';
+    ring.style.height = '36px';
+    ring.style.opacity = '1';
+  });
+});
+
+// ══════════════════════════════════════
+//  BYPASS LOGIC
+// ══════════════════════════════════════
+let currentUrl = '';
+
+function startBypass() {
+  const url = document.getElementById('url-input').value.trim();
+  if (!url || !url.startsWith('http')) {
+    shakeInput();
+    return;
+  }
+  currentUrl = url;
+
+  // ซ่อน input, แสดง captcha
+  document.getElementById('start-btn').disabled = true;
+  document.getElementById('url-input').disabled  = true;
+  document.getElementById('captcha-section').classList.add('show');
+
+  // reload iframe ให้ใหม่ทุกครั้ง
+  const iframe = document.getElementById('cf-iframe');
+  iframe.src = 'https://userscript.baconbypass.online/load-cf?t=' + Date.now();
+}
+
+// รับ token จาก iframe
+window.addEventListener('message', async (e) => {
+  const token = e.data?.token || e.data?.['cf-turnstile-response'];
+  if (!token || !currentUrl) return;
+
+  // ซ่อน captcha, แสดง status
+  document.getElementById('captcha-section').classList.remove('show');
+  showStatus('กำลัง bypass โปรดรอสักครู่…');
+
+  try {
+    const res  = await fetch(API, {
+      method:  'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body:    JSON.stringify({ url: currentUrl, token }),
+      signal:  AbortSignal.timeout(20_000),
+    });
+    const data = await res.json();
+
+    hideStatus();
+
+    if (data.status === 'success') {
+      showSuccess(data.result);
+    } else {
+      showError(data.message || 'เกิดข้อผิดพลาด');
+    }
+  } catch (err) {
+    hideStatus();
+    showError('เชื่อมต่อ API ล้มเหลว: ' + err.message);
+  }
+});
+
+// ── helpers ──────────────────────────
+function showStatus(msg) {
+  document.getElementById('status-text').textContent = msg;
+  document.getElementById('status-bar').classList.add('show');
+}
+function hideStatus() {
+  document.getElementById('status-bar').classList.remove('show');
+}
+
+function showSuccess(result) {
+  const box   = document.getElementById('result-box');
+  const isUrl = /^https?:\/\//i.test(result);
+
+  box.className = 'result-box show success';
+  document.getElementById('result-label').textContent   = '✅ Bypass สำเร็จ!';
+  document.getElementById('result-content').textContent = result;
+
+  const btns = document.getElementById('result-btns');
+  btns.innerHTML = '';
+
+  // copy btn
+  const copy = document.createElement('button');
+  copy.className = 'rbtn';
+  copy.textContent = '📋 Copy';
+  copy.onclick = async () => {
+    await navigator.clipboard.writeText(result);
+    copy.textContent = '✅ Copied!';
+    setTimeout(() => copy.textContent = '📋 Copy', 2000);
+  };
+  btns.appendChild(copy);
+
+  if (isUrl) {
+    const open = document.createElement('button');
+    open.className = 'rbtn primary';
+    open.textContent = '🔗 เปิดลิงก์';
+    open.onclick = () => window.open(result, '_blank');
+    btns.appendChild(open);
+  } else {
+    const dl = document.createElement('button');
+    dl.className = 'rbtn primary';
+    dl.textContent = '💾 Download';
+    dl.onclick = () => {
+      const a = Object.assign(document.createElement('a'), {
+        href: URL.createObjectURL(new Blob([result], {type:'text/plain'})),
+        download: 'result.txt'
+      });
+      a.click();
+    };
+    btns.appendChild(dl);
+  }
+
+  document.getElementById('reset-row').style.display = 'block';
+}
+
+function showError(msg) {
+  const box = document.getElementById('result-box');
+  box.className = 'result-box show error';
+  document.getElementById('result-label').textContent   = '❌ เกิดข้อผิดพลาด';
+  document.getElementById('result-content').textContent = msg;
+  document.getElementById('result-btns').innerHTML      = '';
+  document.getElementById('reset-row').style.display    = 'block';
+}
+
+function resetAll() {
+  currentUrl = '';
+  document.getElementById('url-input').value    = '';
+  document.getElementById('url-input').disabled = false;
+  document.getElementById('start-btn').disabled = false;
+  document.getElementById('captcha-section').classList.remove('show');
+  document.getElementById('status-bar').classList.remove('show');
+  document.getElementById('result-box').className = 'result-box';
+  document.getElementById('result-btns').innerHTML = '';
+  document.getElementById('reset-row').style.display = 'none';
+  document.getElementById('url-input').focus();
+}
+
+function shakeInput() {
+  const el = document.getElementById('url-input');
+  el.style.animation = 'none';
+  el.offsetHeight;
+  el.style.animation = 'shake .4s ease';
+  el.style.borderColor = 'rgba(244,63,94,.5)';
+  setTimeout(() => el.style.borderColor = '', 1500);
+}
+
+// Enter key
+document.getElementById('url-input').addEventListener('keydown', e => {
+  if (e.key === 'Enter') startBypass();
+});
+</script>
+
+<style>
+@keyframes shake{
+  0%,100%{transform:translateX(0)}
+  20%{transform:translateX(-8px)}
+  40%{transform:translateX(8px)}
+  60%{transform:translateX(-5px)}
+  80%{transform:translateX(5px)}
+}
+</style>
+</body>
+</html>
