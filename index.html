@@ -420,7 +420,7 @@ footer strong{color:rgba(0,212,255,.6)}
       <span class="h1-line1">Bypass</span>
       <span class="h1-line2">Ad-Links</span>
     </h1>
-    <p class="hero-sub">ข้ามหน้า ads ได้ทันที ฟรี ไม่ต้องติดตั้งอะไร รองรับกว่า 35 เว็บไซต์</p>
+    <p class="hero-sub">ข้ามหน้า ads ได้ทันที ฟรี ไม่ต้องติดตั้งอะไร รองรับกว่า 40 เว็บไซต์</p>
     <p class="hero-by">จัดทำโดย <span>tawan_x2noban</span> · GOXDEV SHOP</p>
   </div>
 
@@ -487,7 +487,7 @@ footer strong{color:rgba(0,212,255,.6)}
 
   <!-- SUPPORTED SITES -->
   <div class="sites-section">
-    <p class="sites-title">รองรับ 35+ เว็บไซต์</p>
+    <p class="sites-title">รองรับ 40+ เว็บไซต์</p>
     <div class="sites-grid" id="sites-grid"></div>
   </div>
 
@@ -501,7 +501,7 @@ footer strong{color:rgba(0,212,255,.6)}
 // ══════════════════════════════════════
 //  CONFIG
 // ══════════════════════════════════════
-const API = 'https://goxdev-bypass-api.goxdev-api.workers.dev/bypass';
+const API = 'https://tawan-bypass.goxdev-api.workers.dev/bypass';
 
 const SITES = [
   'linkvertise.com','lootdest.org','lootdest.com','lootdest.info',
@@ -514,6 +514,8 @@ const SITES = [
   'scriptpastebins.com','socialwolvez.com','robloxscripts.gg',
   'neoxsoftworks.eu','ntt-hub.xyz','ldnesfspublic.org',
   'auth.platoboost.app','auth.platorelay.com','trigonevo.com',
+  'blog.tapvietcode.com','link4sub.com','linkunlocker.com',
+  'rentry.co','scriptblox.club','scriptix.live',
 ];
 
 // ── render sites ──────────────────────
@@ -596,8 +598,7 @@ window.addEventListener('message', async (e) => {
       method:  'POST',
       headers: { 'Content-Type': 'application/json' },
       body:    JSON.stringify({ url: currentUrl, token }),
-      // BUG FIX: เพิ่ม timeout 30s (platorelay/platoboost ช้า)
-      signal:  AbortSignal.timeout(30_000),
+      // รอได้ไม่จำกัดเวลา
     });
 
     // BUG FIX: เช็ค HTTP status ก่อน parse JSON
@@ -623,10 +624,7 @@ window.addEventListener('message', async (e) => {
     }
   } catch (err) {
     hideStatus();
-    // BUG FIX: แยก timeout error ออกให้ชัด
-    const msg = err.name === 'TimeoutError'
-      ? 'หมดเวลา 30 วินาที — กรุณาลองใหม่'
-      : 'เชื่อมต่อ API ล้มเหลว: ' + err.message;
+    const msg = err.message;
     showError(msg);
   }
 });
