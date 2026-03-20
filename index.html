@@ -434,14 +434,7 @@ footer strong{color:rgba(0,212,255,.6)}
       <button class="btn-bypass" id="start-btn" onclick="startBypass()">Bypass →</button>
     </div>
 
-    <!-- captcha -->
-    <div id="captcha-section">
-      <p class="captcha-label">กรุณายืนยันว่าคุณไม่ใช่บอท<br/><strong>กดผ่าน captcha ด้านล่างเพื่อดำเนินการต่อ</strong></p>
-      <iframe id="cf-iframe"
-              src="https://userscript.baconbypass.online/load-cf"
-              scrolling="no"
-              allowtransparency="true"></iframe>
-    </div>
+    <!-- captcha ถูกลบออกแล้ว ใช้ Bacon Key API -->
 
     <!-- status -->
     <div id="status-bar">
@@ -475,7 +468,7 @@ footer strong{color:rgba(0,212,255,.6)}
       <div class="step">
         <div class="step-icon">✅</div>
         <div class="step-num">Step 02</div>
-        <div class="step-text">กดผ่าน captcha เพื่อยืนยันว่าไม่ใช่บอท</div>
+        <div class="step-text">กด Bypass → รอสักครู่ (ไม่ต้องทำ captcha)</div>
       </div>
       <div class="step">
         <div class="step-icon">🚀</div>
@@ -562,7 +555,7 @@ document.querySelectorAll('button,a,.site-tag,.step').forEach(el => {
 // ══════════════════════════════════════
 let currentUrl = '';
 
-function startBypass() {
+async function startBypass() {
   const url = document.getElementById('url-input').value.trim();
   if (!url || !url.startsWith('http')) {
     shakeInput();
@@ -570,38 +563,17 @@ function startBypass() {
   }
   currentUrl = url;
 
-  // ซ่อน input, แสดง captcha
   document.getElementById('start-btn').disabled = true;
   document.getElementById('url-input').disabled  = true;
-  document.getElementById('captcha-section').classList.add('show');
-
-  // reload iframe ให้ใหม่ทุกครั้ง
-  const iframe = document.getElementById('cf-iframe');
-  iframe.src = 'https://userscript.baconbypass.online/load-cf?t=' + Date.now();
-}
-
-// รับ token จาก iframe
-// BUG FIX: ป้องกัน token ถูกส่งซ้ำหลายครั้ง
-let tokenReceived = false;
-window.addEventListener('message', async (e) => {
-  const token = e.data?.token || e.data?.['cf-turnstile-response'];
-  // BUG FIX: เช็ค token ว่าง / invalid / ซ้ำ
-  if (!token || token.length < 10 || !currentUrl || tokenReceived) return;
-  tokenReceived = true;
-
-  // ซ่อน captcha, แสดง status
-  document.getElementById('captcha-section').classList.remove('show');
   showStatus('กำลัง bypass โปรดรอสักครู่…');
 
   try {
-    const res  = await fetch(API, {
+    const res = await fetch(API, {
       method:  'POST',
       headers: { 'Content-Type': 'application/json' },
-      body:    JSON.stringify({ url: currentUrl, token }),
-      // รอได้ไม่จำกัดเวลา
+      body:    JSON.stringify({ url: currentUrl }),
     });
 
-    // BUG FIX: เช็ค HTTP status ก่อน parse JSON
     if (!res.ok) {
       const errData = await res.json().catch(() => ({}));
       hideStatus();
@@ -613,21 +585,16 @@ window.addEventListener('message', async (e) => {
     hideStatus();
 
     if (data.status === 'success') {
-      // BUG FIX: เช็ค result ว่าง
-      if (!data.result) {
-        showError('ได้รับ result ว่าง — กรุณาลองใหม่');
-        return;
-      }
+      if (!data.result) { showError('ได้รับ result ว่าง — กรุณาลองใหม่'); return; }
       showSuccess(data.result);
     } else {
       showError(data.message || 'เกิดข้อผิดพลาด');
     }
   } catch (err) {
     hideStatus();
-    const msg = err.message;
-    showError(msg);
+    showError(err.name === 'TypeError' ? 'เชื่อมต่อ API ไม่ได้' : 'เกิดข้อผิดพลาด: ' + err.message);
   }
-});
+}
 
 // ── helpers ──────────────────────────
 function showStatus(msg) {
@@ -694,7 +661,6 @@ function showError(msg) {
 
 function resetAll() {
   currentUrl = '';
-  tokenReceived = false; // BUG FIX: reset flag ทุกครั้งที่ bypass ใหม่
   document.getElementById('url-input').value    = '';
   document.getElementById('url-input').disabled = false;
   document.getElementById('start-btn').disabled = false;
